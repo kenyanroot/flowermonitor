@@ -1,5 +1,7 @@
 celery
 flower
 redis
+prometheus
+prometheus-client
 
 
