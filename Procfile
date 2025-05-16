@@ -1,2 +1,2 @@
-web: bash flowers.sh
+web: prometheus --config.file=prometheus.yml
 
