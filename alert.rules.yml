@@ -1,0 +1,39 @@
+groups:
+  - name: celery-alerts
+    rules:
+      - alert: TooManyFailedTasks
+        expr: increase(flower_task_failed_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of failed Celery tasks"
+          description: "More than 5 tasks failed in the last 5 minutes."
+      - alert: CeleryWorkersDown
+        expr: flower_workers_online == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "All Celery workers are down"
+          description: "No Celery workers are online."
+  - name: redis-alerts
+    rules:
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_config_maxmemory_bytes > 0.9
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis is using more than 90% of its configured max memory."
+  - name: django-alerts
+    rules:
+      - alert: DjangoDown
+        expr: probe_success{job="django"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Django app is down"
+          description: "The Django app is not responding to HTTP probes." 

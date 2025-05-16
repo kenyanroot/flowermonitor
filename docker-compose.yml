@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  flower:
+    build: .
+    command: bash flowers.sh
+    ports:
+      - "5555:5555"
+    environment:
+      - PORT=5555
+      - BROKER_URL=${BROKER_URL}
+      - RESULT_BACKEND=${RESULT_BACKEND}
+      - FLOWER_BASIC_AUTH=${FLOWER_BASIC_AUTH}
+    depends_on:
+      - redis
+  redis:
+    image: redis:7
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml
+    depends_on:
+      - redis-exporter
+      - blackbox-exporter
+      - alertmanager
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    depends_on:
+      - redis
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis:6379
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    ports:
+      - "9115:9115" 

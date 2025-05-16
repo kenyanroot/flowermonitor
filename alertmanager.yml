@@ -1,0 +1,7 @@
+global:
+  resolve_timeout: 5m
+route:
+  receiver: 'default'
+receivers:
+  - name: 'default'
+    # For demo: just log alerts. To send email/slack, add config here. 
